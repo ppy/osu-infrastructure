@@ -140,7 +140,18 @@ CREATE TABLE `solo_scores` (
   KEY `solo_scores_user_id_index` (`user_id`),
   KEY `solo_scores_preserve_index` (`preserve`)
 );
+```
 
+- The majority of scoring data has been moved into the `data` JSON field. The structure of this JSON is documented in [osu](https://github.com/ppy/osu-queue-score-statistics/blob/82ba5f48ca6b268b52b028ba70918db2fee09382/osu.Server.Queues.ScoreStatisticsProcessor/Models/SoloScoreInfo.cs#L21) and [osu-web](https://github.com/ppy/osu-web/blob/master/app/Models/Solo/Score.php). The schema of this JSON is intended to evolve over time, but should also be backwards compatible (ie. we should only be adding data, in general, unless we are also performing migration).
+- All columns in this table that are duplicated redundantly outside of `data` are done so for efficient lookup purposes.
+- The `preserve` flag marks whether the score in question should remain in the database. When we have purge logic in place, scores which are not marked as `preserve` will be deleted permanently x days after `updated_at`.
+
+Further consideration:
+
+- We likely will need to encompass `beatmap_id` (and maybe `ruleset_id`) into the `user_id` index for internal lookup purposes (ie. when a user sets a score, we will want to compare other scores that same user has set on the beatmap to resolve any conflicts and decide on a deletion strategy). This requires some profiling on whether increasing the length of the key has an adverse effect on performance metrics we care about.
+- We likely don't need the full laravel `timestamp` column specifications (specifically `deleted_at` and `created_at`). Removing these could reduce storage requirements.
+
+```sql
 CREATE TABLE `solo_score_tokens` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `score_id` bigint DEFAULT NULL,
@@ -152,13 +163,24 @@ CREATE TABLE `solo_score_tokens` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
+```
 
+- Tokens are temporary entries which mark the beginning of a new play. The primary purpose is to store information which is provided by the client at the beginning of the play which may not be conveyed again at final submission (or may be preferred to arrive sooner for validation purposes). It can also be used to obtain the wall clock time passed between start and end of the play (including pauses or delays in score submission).
+
+```sql
 CREATE TABLE `solo_scores_performance` (
   `score_id` bigint unsigned NOT NULL,
   `pp` double(8,2) DEFAULT NULL,
   PRIMARY KEY (`score_id`)
 );
+```
 
+- Performance point values have very intentionally been stored separate from the scores themselves. This will allow for updates to be performed without creating any contention on the main storage table, but also flexibility to potentially:
+    - Have multiple tables during pp updates, with `osu-web` falling back to old tables if data is not populated in the newer one. This can allow for insert-only pp population.
+    - Have calculations performed offline during pp updates, and dropped in-place once completed (note that this would require a catch-up process or merge process, but could potentially be the most efficient way of performing pp updates).
+- This data will likely be flattened in actual usages alongside other pieces from `solo_scores` (ie. in elasticsearch indices).
+
+```sql
 CREATE TABLE `solo_scores_process_history` (
   `score_id` bigint NOT NULL,
   `processed_version` tinyint NOT NULL,
@@ -166,6 +188,7 @@ CREATE TABLE `solo_scores_process_history` (
   PRIMARY KEY (`score_id`)
 );
 ```
+- Tracks processing of scores, currently by [osu-queue-score-statistics](https://github.com/ppy/osu-queue-score-statistics) exclusively. Allows for changes in processing to be reapplied to existing scores (as the processor can handle reverting and reapplying based on the `processed_version`).
 
 ### 🏃 Import stable scores to new storage
 
