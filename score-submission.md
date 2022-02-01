@@ -195,6 +195,17 @@ CREATE TABLE `solo_scores_process_history` (
 
 Scores in the new `solo_scores` tables have new IDs. We need a table structure to link old scores to the new ones, for cases where a request is made against the ID directly (ie. a [score display page](https://osu.ppy.sh/scores/osu/4049360982)).
 
+Current proposal:
+
+```sql
+CREATE TABLE `solo_scores_legacy_id_map` (
+  `ruleset_id` smallint unsigned NOT NULL,
+  `old_score_id` int unsigned NOT NULL,
+  `score_id` bigint NOT NULL,
+  PRIMARY KEY (`ruleset_id`, `old_score_id`)
+);
+```
+
 ### ⏱ Create a new elasticsearch schema
 
 Currently elasticsearch is used for user profile pages to get "user best" scores. Given that all score metadata is already loaded into elasticsearch, we could actually have been using it for more than this (taking some serious load off the database servers).
