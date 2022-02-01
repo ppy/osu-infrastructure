@@ -149,7 +149,8 @@ CREATE TABLE `solo_scores` (
 Further consideration:
 
 - We likely will need to encompass `beatmap_id` (and maybe `ruleset_id`) into the `user_id` index for internal lookup purposes (ie. when a user sets a score, we will want to compare other scores that same user has set on the beatmap to resolve any conflicts and decide on a deletion strategy). This requires some profiling on whether increasing the length of the key has an adverse effect on performance metrics we care about.
-- We likely don't need the full laravel `timestamp` column specifications (specifically `deleted_at` and `created_at`). Removing these could reduce storage requirements.
+- We likely don't need the full laravel `timestamp` column specifications (specifically `deleted_at` and potentially `created_at`, although this one is arguable as we may require `updated_at` to track the last usage for purging non-`preserve`d scores). Removing these could reduce storage requirements.
+- The `preserve` flag will probably need to be managed by `osu-web`. For instance, a score may need to be preserved due to a user having it pinned to their profile, regardless of its usage elsewhere.
 
 ```sql
 CREATE TABLE `solo_score_tokens` (
@@ -212,6 +213,14 @@ https://osu.ppy.sh/scores/4049360982     <- new (doesn't require ruleset prefix)
 ### ⏱ Create a pump and ES population flow
 
 Scores coming in via `osu-web-10` will need to populate into `solo_scores` in real-time. When this happens, we will also need to ensure that ES is made aware of new scores. Historically this has been done using the [osu-elastic-indexer](https://github.com/ppy/osu-elastic-indexer) component – whether we update this to work with the new table or replace it with, for instance, hooks installed in osu-web API endpoints is yet to be decided.
+
+### ⏱ Decide on purge mechanism for `solo_scores`
+
+As mentioned previously, we will want to clean up the `solo_scores` tables in the case the `preserve` flag lets us know that a score is not being used anywhere.
+
+Traditionally, non-high scores (ie. when a user's score did not replace their existing score on the same beatmap-ruleset-mod combination) would be inserted into a separate table which uses mysql partitioning to efficiently truncate rows older than 24 hours.
+
+We will likely want to use partitioning again, which is going to require performance and structural considerations – mainly what are we partitioning over? `(preserve, date_format(updated_at, 'YYMMDD'))` may work but will also increase the size of the primary key.
 
 ### 🏃 Import stable scores to new storage
 
