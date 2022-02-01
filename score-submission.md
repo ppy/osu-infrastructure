@@ -226,9 +226,9 @@ Make sure that this process can be run efficiently regardless of the size of the
 
 There's a lot to discuss in terms of balancing and integration of the two score sources. Some that come to mind are:
 
-- we need to figure out how the two methods of scoring are going to work together going forward
-- smoogipoo wants to discuss the concept of "prestige" leaderboards
-- i want to abolish mod multipliers
+- Figure out how to handle total score display (standardised vs classic)
+- Discuss adding pp based sorting to leaderboards (and ensuring enough data is preserved to make this happen)
+- Path to removing mod multipliers
 
 ### Statistics
 
