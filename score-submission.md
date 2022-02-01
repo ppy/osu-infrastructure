@@ -190,6 +190,29 @@ CREATE TABLE `solo_scores_process_history` (
 ```
 - Tracks processing of scores, currently by [osu-queue-score-statistics](https://github.com/ppy/osu-queue-score-statistics) exclusively. Allows for changes in processing to be reapplied to existing scores (as the processor can handle reverting and reapplying based on the `processed_version`).
 
+### ⏱ Create score ID linking table
+
+Scores in the new `solo_scores` tables have new IDs. We need a table structure to link old scores to the new ones, for cases where a request is made against the ID directly (ie. a [score display page](https://osu.ppy.sh/scores/osu/4049360982)).
+
+### ⏱ Create a new elasticsearch schema
+
+Currently elasticsearch is used for user profile pages to get "user best" scores. Given that all score metadata is already loaded into elasticsearch, we could actually have been using it for more than this (taking some serious load off the database servers).
+
+With the new table structure, the above becomes a *requirement*. All leaderboard lookups will need to be done via elasticsearch as there will be no means (index) to do so via mysql.
+
+### ⏱ Update osu-web to display scores using the new structure
+
+As we are going to be running both systems alongside each other, the ability to display scores from the old and new table structure is required. Current proposal is:
+
+```
+https://osu.ppy.sh/scores/osu/4049360982 <- old
+https://osu.ppy.sh/scores/4049360982     <- new (doesn't require ruleset prefix)
+```
+
+### ⏱ Create a pump and ES population flow
+
+Scores coming in via `osu-web-10` will need to populate into `solo_scores` in real-time. When this happens, we will also need to ensure that ES is made aware of new scores. Historically this has been done using the [osu-elastic-indexer](https://github.com/ppy/osu-elastic-indexer) component – whether we update this to work with the new table or replace it with, for instance, hooks installed in osu-web API endpoints is yet to be decided.
+
 ### 🏃 Import stable scores to new storage
 
 An importer for this purpose
