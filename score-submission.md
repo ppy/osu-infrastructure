@@ -197,9 +197,13 @@ For simplicity, these stats are *just for the osu! ruleset*. The overall number 
 24h Scores (stored regardless of pass/fail)
 ---------
 
-Scores ingested: 15,579,568 Ingested scores which are non-fail: 3,268,037 Storage size: 3.7gb Size per score: 237 bytes
+Scores ingested: 9,284,715
+Ingested scores which are non-fail: 1,864,121
+Storage size: 3.7gb Size per score: 237 bytes
 
 Overall High Scores
 ---------
 
-Scores stored: 1,250,672,940 Storage size: 195gb Size per score: 167 bytes
+Scores stored: 1,517,428,252
+Storage size: 230gb Size per score: 167 bytes
+Delta (24h): ~1,300,000 scores
