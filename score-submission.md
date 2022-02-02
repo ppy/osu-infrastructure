@@ -201,6 +201,12 @@ https://osu.ppy.sh/scores/4049360982     <- new (doesn't require ruleset prefix)
 Scores coming in via `osu-web-10` will need to populate into `solo_scores` in real-time. When this happens, we will also need to ensure that ES is made aware of new scores. Historically this has been done using the
 [osu-elastic-indexer](https://github.com/ppy/osu-elastic-indexer) component – whether we update this to work with the new table or replace it with, for instance, hooks installed in osu-web API endpoints is yet to be decided.
 
+### ⏱ Add replay saving support for lazer scores
+
+Currently replay data is not being sent nor stored by lazer. This will need `osu-web` support, and further thought as to how we want to structure and store them. Legacy `osu_x_replays` tables will likely want to be replaced, using the new `score_id` and adding extra metadata to manage the lifecycle of the replay.
+
+May be worth considering [requirements for ordering by most-watched](https://github.com/ppy/osu-web/issues/6412#issuecomment-1027539986) in the process.
+
 ### ⏱ Decide on purge mechanism for `solo_scores`
 
 As mentioned previously, we will want to clean up the `solo_scores` tables in the case the `preserve` flag lets us know that a score is not being used anywhere.
