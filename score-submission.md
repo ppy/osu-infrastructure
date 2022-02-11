@@ -84,11 +84,11 @@ Basic statistics which can be updated:
 - Total score
 - Hit counts
 - Recent plays
+- Play time
 
 Not yet supported:
 
 - Medals
-- Play time
 
 ### ✅ Decide on storage method and structure
 
