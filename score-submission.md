@@ -230,6 +230,8 @@ This import was to test compatibility mostly. We will need to reinitialise these
 
 We should be able to, given one or more client version hashes, remove all related scores (and rollback relevant stats). This is something we haven't been able to do until now, which has limited the ability to have test runs of game-breaking changes or to limit rollback of bugs to only those scores submitted against the affected version(s).
 
+`solo_score_tokens` table contains `build_id` and the related `score_id` so wiping scores from specific version can already be done by querying it. The table is missing index for it though.
+
 Make sure that this process can be run efficiently regardless of the size of the wipe.
 
 ### ⏱ Balancing, forward plans, etc.
