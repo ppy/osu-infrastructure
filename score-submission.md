@@ -196,7 +196,7 @@ https://osu.ppy.sh/scores/osu/4049360982 <- old
 https://osu.ppy.sh/scores/4049360982     <- new (doesn't require ruleset prefix)
 ```
 
-Eventually old scores will be redirected to new scores.
+Eventually old scores will be redirected to new scores using mapping data in `solo_scores_legacy_id_map`.
 
 ### ⏱ Create a pump and ES population flow
 
