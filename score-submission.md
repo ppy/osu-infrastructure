@@ -187,14 +187,16 @@ Currently elasticsearch is used for user profile pages to get "user best" scores
 
 With the new table structure, the above becomes a *requirement*. All leaderboard lookups will need to be done via elasticsearch as there will be no means (index) to do so via mysql.
 
-### 🏃 Update osu-web to display scores using the new structure
+### ✅ Update osu-web to display scores using the new structure
 
-As we are going to be running both systems alongside each other, the ability to display scores from the old and new table structure is required. Current proposal is:
+As we are going to be running both systems alongside each other, the ability to display scores from the old and new table structure is required.
 
 ```
 https://osu.ppy.sh/scores/osu/4049360982 <- old
 https://osu.ppy.sh/scores/4049360982     <- new (doesn't require ruleset prefix)
 ```
+
+Eventually old scores will be redirected to new scores.
 
 ### ⏱ Create a pump and ES population flow
 
