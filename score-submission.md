@@ -181,7 +181,7 @@ CREATE TABLE `solo_scores_legacy_id_map`
 );
 ```
 
-### ⏱ Create a new elasticsearch schema
+### ✅ Create a new elasticsearch schema
 
 Currently elasticsearch is used for user profile pages to get "user best" scores. Given that all score metadata is already loaded into elasticsearch, we could actually have been using it for more than this (taking some serious load off the database servers).
 
@@ -198,7 +198,7 @@ https://osu.ppy.sh/scores/4049360982     <- new (doesn't require ruleset prefix)
 
 Eventually old scores will be redirected to new scores using mapping data in `solo_scores_legacy_id_map`.
 
-### ⏱ Create a pump and ES population flow
+### ✅ Create a pump and ES population flow
 
 Scores coming in via `osu-web-10` will need to populate into `solo_scores` in real-time. When this happens, we will also need to ensure that ES is made aware of new scores. Historically this has been done using the
 [osu-elastic-indexer](https://github.com/ppy/osu-elastic-indexer) component – whether we update this to work with the new table or replace it with, for instance, hooks installed in osu-web API endpoints is yet to be decided.
@@ -213,7 +213,7 @@ At a later stage, this will need `osu-web` support, and further thought as to ho
 
 May be worth considering [requirements for ordering by most-watched](https://github.com/ppy/osu-web/issues/6412#issuecomment-1027539986) in the process.
 
-### ⏱ Decide on purge mechanism for `solo_scores`
+### 🏃 Decide on purge mechanism for `solo_scores`
 
 As mentioned previously, we will want to clean up the `solo_scores` tables in the case the `preserve` flag lets us know that a score is not being used anywhere.
 
@@ -221,7 +221,7 @@ Traditionally, non-high scores (ie. when a user's score did not replace their ex
 
 We will likely want to use partitioning again, which is going to require performance and structural considerations – mainly what are we partitioning over? `(preserve, date_format(updated_at, 'YYMMDD'))` may work but will also increase the size of the primary key.
 
-### 🏃 Import stable scores to new storage
+### ✅ Import stable scores to new storage
 
 An importer for this purpose has [been created](https://github.com/ppy/osu-queue-score-statistics/blob/master/osu.Server.Queues.ScorePump/ImportHighScores.cs)
 . A test import was run on production in December, which took around 5 days (limited by threading of the importer, so can be vastly improved).
