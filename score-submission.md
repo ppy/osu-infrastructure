@@ -1,3 +1,59 @@
+# Current score submission flow
+
+```mermaid
+
+sequenceDiagram title Score submission flow
+    participant C as osu!lazer
+    participant W as osu-web
+    participant S as osu-spectator-server
+    participant QS as osu-queue-score-statistics
+    participant QE as osu-elastic-indexer
+    participant DB as MySQL
+    participant R as Redis
+    participant S3
+    participant ES as Elasticsearch
+
+    C->>+W: Request score submission token (POST /beatmaps/{beatmap_id}/solo/scores)
+
+    W->>DB: Store token to solo_score_tokens
+    W-->>-C: Provide {token_id} (APIScoreToken)
+
+    C->>+S: Signal begin play (BeginPlaySession({token_id}))
+    Note over C: Playing beatmap
+
+    loop Gameplay
+        C->>S: Send frame bundle (SendFrameData)
+    end
+
+    Note over C: Finished playing
+    C->>S: Signal finished (EndPlaySession)
+
+    C->>+W: Submit score (PUT /beatmaps/{beatmap_id}/solo/scores/{token_id})
+    W->>DB: Store token to solo_scores
+    W->>R: Push to score-statistics
+    W-->>-C: Provide {score_id}
+    
+    # TODO: anticheat flow should probably be inserted here, redirecting to a separate queue
+    
+    par Replay upload
+        DB-->>S: Found score_id for token (solo_score_tokens.score_id IS NOT NULL)
+        S->>S3: Upload replay (ScoreUploader.Flush)
+        S->>-DB: Mark has replay (UPDATE solo_scores SET has_replay = 1)
+    and Score processing
+        R-->>+QS: Pop queue entry from score-statistics
+        QS->>DB: Update playcount (osu_user_beatmap_playcount, osu_user_month_playcount)
+        QS->>DB: Update pp (INSERT INTO solo_scores_performance)
+        QS->>DB: Update other statistics (UPDATE osu_user_stats)
+        QS->>DB: Award medals (INSERT INTO osu_user_achievements)
+        QS->>DB: Set preserve flag if required (UPDATE solo_score SET preserve = 1)
+        QS->>-R: Push to indexing queue (score-index-{schema_version})
+    and Score indexing
+        R-->>+QE: Pop queue entry from score_index-{schema_version}
+        DB-->>QE: Read score (solo_scores)
+        QE->>-ES: Update index
+    end
+```
+
 # Score infrastructure migration plan
 
 This document aims to cover the current structure of score submission from an infrastructure perspective, with the goal of moving towards consolidating the future (lazer) and present (osu-stable) into some kind of combined leaderboard.
