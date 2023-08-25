@@ -54,6 +54,61 @@ sequenceDiagram title Score submission flow
     end
 ```
 
+# Current usage stats
+
+As of 2023-08-17:
+
+```sql
+mysql> select count(*) from solo_scores;
++------------+
+| count(*)   |
++------------+
+| 2380500256 |
++------------+
+1 row in set (2 hours 46 min 28.36 sec)
+
+mysql> select count(*) from solo_scores where preserve = 1;
++------------+
+| count(*)   |
++------------+
+| 2306532757 |
++------------+
+1 row in set (37 min 43.92 sec)
+
+mysql> select count(*) from solo_scores where data->"$.legacy_score_id" is not null;
++------------+
+| count(*)   |
++------------+
+| 2305803972 |
++------------+
+1 row in set (7 hours 7 min 41.72 sec)
+
+mysql> select count(*) from solo_scores where data->"$.legacy_score_id" is null;
++----------+
+| count(*) |
++----------+
+| 75388822 |
++----------+
+1 row in set (7 hours 4 min 34.84 sec)
+
+mysql> select user_id, count(id) from solo_scores where preserve = 1 group by user_id order by count(id) desc limit 10;
+
++---------+-----------+
+| user_id | count(id) |
++---------+-----------+
+| 4937439 |    114526 |
+| 9217626 |    109493 |
+| 7807460 |    108895 |
+| 2927048 |    107569 |
+| 3172980 |    104732 |
+| 7635621 |    103095 |
+|  647309 |     99689 |
+| 4781004 |     91402 |
+|   47844 |     89986 |
+| 4568537 |     86693 |
++---------+-----------+
+```
+
 # Score infrastructure migration plan
 
 This document aims to cover the current structure of score submission from an infrastructure perspective, with the goal of moving towards consolidating the future (lazer) and present (osu-stable) into some kind of combined leaderboard.
