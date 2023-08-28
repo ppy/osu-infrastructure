@@ -334,7 +334,7 @@ We will likely want to use partitioning again, which is going to require perform
 
 ### ✅ Import stable scores to new storage
 
-An importer for this purpose has [been created](https://github.com/ppy/osu-queue-score-statistics/blob/master/osu.Server.Queues.ScorePump/ImportHighScores.cs)
+An importer for this purpose has [been created](https://github.com/ppy/osu-queue-score-statistics/blob/master/osu.Server.Queues.ScoreStatisticsProcessor/Commands/Queue/ImportHighScoresCommand.cs)
 . A test import was run on production in December, which took around 5 days (limited by threading of the importer, so can be vastly improved).
 
 This import was to test compatibility mostly. We will need to reinitialise these scores once a linking table has been created, because as it stands there's no way to know which score relates to the original `score_id`s.
