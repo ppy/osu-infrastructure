@@ -196,8 +196,8 @@ Firstly, let's look at all the things which currently happen in the average scor
             - check medal unlocks
             - if the score is a new user high
                 - store permanently in high scores table
-                - wait for x ms for pp to be populated by `osu-performance`
-                    - `osu-performance` is constantly polling for new scores and usually processes the pp before timeout
+                - wait for x ms for `score_process_history` to be populated by `osu-queue-score-statistics`
+                    - This covers the import and processing of the legacy score in the new systems, which now handle user total PP updates.
     - return updated statistics to the user, one row per leaderboard, including pp if available
 
 ## New infrastructure
