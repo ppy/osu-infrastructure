@@ -287,6 +287,7 @@ CREATE TABLE `scores` (
     `ended_at`            timestamp           NOT NULL,
     `unix_updated_at`     int unsigned        NOT NULL DEFAULT (unix_timestamp()),
     -- Last update time of the row.
+    -- Is used for recent scores display on profiles (due to being the only indexed timestamp field)
     `build_id`            smallint unsigned   DEFAULT NULL,
     -- ID of the build on which the score was set.
     PRIMARY KEY (`id`,`preserve`,`unix_updated_at`),
